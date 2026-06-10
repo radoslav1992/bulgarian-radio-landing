@@ -33,13 +33,14 @@ export async function GET() {
     .sort((a, b) => a.data.name.localeCompare(b.data.name, 'bg'))
     .map((s) => ({
       loc: `/stations/${s.slug}`,
-      lastmod: new Date().toISOString().split('T')[0],
       changefreq: 'monthly',
       priority: '0.8',
     }));
 
-  const allEntries = [
-    ...staticPages.map((p) => ({ ...p, lastmod: new Date().toISOString().split('T')[0] })),
+  // Only blog entries carry a real lastmod; stamping build time on every URL
+  // would just teach crawlers to ignore the field.
+  const allEntries: Array<{ loc: string; changefreq: string; priority: string; lastmod?: string }> = [
+    ...staticPages,
     ...stationEntries,
     ...blogEntries,
   ];
@@ -49,8 +50,7 @@ export async function GET() {
 ${allEntries
   .map(
     (e) => `  <url>
-    <loc>${SITE}${e.loc}</loc>
-    <lastmod>${e.lastmod}</lastmod>
+    <loc>${SITE}${e.loc}</loc>${e.lastmod ? `\n    <lastmod>${e.lastmod}</lastmod>` : ''}
     <changefreq>${e.changefreq}</changefreq>
     <priority>${e.priority}</priority>
   </url>`

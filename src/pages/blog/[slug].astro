@@ -26,7 +26,7 @@ const jsonLd = {
   headline: post.data.title,
   description: post.data.description,
   datePublished: post.data.date,
-  ...(post.data.updated ? { dateModified: post.data.updated } : {}),
+  dateModified: post.data.updated || post.data.date,
   author: {
     '@type': 'Person',
     name: post.data.author,

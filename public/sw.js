@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'radio-bg-v1';
+const CACHE_VERSION = 'radio-bg-v2';
 const APP_SHELL = [
   '/',
   '/logo.png',
@@ -47,6 +47,26 @@ self.addEventListener('fetch', (event) => {
     url.pathname.endsWith('.ogg')
   ) {
     event.respondWith(fetch(request));
+    return;
+  }
+
+  // Network-first for page navigations so deploys reach users immediately;
+  // fall back to the cached copy when offline.
+  const isNavigation =
+    request.mode === 'navigate' ||
+    request.headers.get('accept')?.includes('text/html');
+  if (isNavigation) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response.ok && url.origin === self.location.origin) {
+            const clone = response.clone();
+            caches.open(CACHE_VERSION).then((cache) => cache.put(request, clone));
+          }
+          return response;
+        })
+        .catch(() => caches.match(request).then((cached) => cached || caches.match('/')))
+    );
     return;
   }
 

@@ -93,8 +93,10 @@ const jsonLd = [
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
     name: 'Радио България',
+    url: 'https://bulgariaradio.com',
     browserRequirements: 'Requires a modern browser with HTML5 audio support',
     applicationCategory: 'MultimediaApplication',
+    operatingSystem: 'All',
     description: 'Безплатен уеб плейър за български радио станции онлайн. Android приложение — очаквайте скоро.',
     inLanguage: 'bg',
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'BGN' },
@@ -116,7 +118,10 @@ const jsonLd = [
     inLanguage: 'bg',
     potentialAction: {
       '@type': 'SearchAction',
-      target: 'https://bulgariaradio.com/#player',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: 'https://bulgariaradio.com/?q={search_term_string}#player',
+      },
       'query-input': 'required name=search_term_string',
     },
   },
@@ -128,7 +133,7 @@ const jsonLd = [
   jsonLd={jsonLd}
 >
   <section class="hero container">
-    <img class="hero-logo" src="/logo.png" alt="Радио България — лого" width="160" height="160" />
+    <img class="hero-logo" src="/logo.png" alt="Радио България — лого" width="160" height="160" fetchpriority="high" />
     <h1>Радио България</h1>
     <p class="tagline">
       Слушай безплатно над 100 български радио станции — поп, рок, фолк, дип хаус, новини и още.
@@ -175,10 +180,10 @@ const jsonLd = [
       <p>Просто, чисто и в твоя стил.</p>
     </div>
     <div class="screenshots">
-      <img src="/screenshots/home.png" alt="Списък с български радио станции" loading="lazy" width="1080" height="2404" />
-      <img src="/screenshots/favorites.png" alt="Любими станции" loading="lazy" width="1080" height="2404" />
-      <img src="/screenshots/history.png" alt="История на слушане" loading="lazy" width="1080" height="2404" />
-      <img src="/screenshots/player.png" alt="Ретро плейър със зелен скалател" loading="lazy" width="1080" height="2404" />
+      <img src="/screenshots/home.png" alt="Списък с български радио станции" loading="lazy" decoding="async" width="1080" height="2404" />
+      <img src="/screenshots/favorites.png" alt="Любими станции" loading="lazy" decoding="async" width="1080" height="2404" />
+      <img src="/screenshots/history.png" alt="История на слушане" loading="lazy" decoding="async" width="1080" height="2404" />
+      <img src="/screenshots/player.png" alt="Ретро плейър със зелен скалател" loading="lazy" decoding="async" width="1080" height="2404" />
     </div>
   </section>
 
