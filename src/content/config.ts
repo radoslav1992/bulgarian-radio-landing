@@ -26,6 +26,9 @@ const stations = defineCollection({
     language: z.string().default('български'),
     country: z.string().default('България'),
     slogan: z.string().optional(),
+    /** Override for matching this station in the Radio Browser catalog
+     *  (defaults to `name`, transliterated Cyrillic→Latin on the client). */
+    playerQuery: z.string().optional(),
   }),
 });
 

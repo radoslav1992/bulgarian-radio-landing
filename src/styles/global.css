@@ -1,4 +1,5 @@
 :root {
+  color-scheme: light;
   --bg: #ece5d8;
   --bg-elev: #f5f0e8;
   --bg-card: #faf8f4;
@@ -6,7 +7,7 @@
   --border: #ddd5c8;
   --border-strong: #c8bfb0;
   --text: #2d2a26;
-  --text-muted: #78716a;
+  --text-muted: #615b54;
   --gold: #c07830;
   --gold-bright: #d48a3c;
   --gold-deep: #a56828;
@@ -17,10 +18,36 @@
   --live: #22c55e;
   --dial-green: #2a5a42;
   --dial-green-bright: #3d7a5c;
+  --header-bg: rgba(245, 240, 232, 0.96);
+  --footer-bg: #e4ddd0;
+  --panel-1: #f0ebe2;
+  --panel-2: #e4ddd0;
+  --star-idle: #c8bfb0;
   --font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
   --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --max: 1100px;
   --np-h: 76px;
+}
+
+/* Dark theme: warm walnut-cabinet tones to match the retro radio brand. */
+html[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #1d1812;
+  --bg-elev: #262019;
+  --bg-card: #2b241b;
+  --bg-card-hover: #352c21;
+  --border: #3a3127;
+  --border-strong: #4f4435;
+  --text: #ede4d4;
+  --text-muted: #a89b86;
+  --gold: #d68f42;
+  --gold-bright: #e3a155;
+  --gold-deep: #c07830;
+  --header-bg: rgba(29, 24, 18, 0.95);
+  --footer-bg: #171310;
+  --panel-1: #352c21;
+  --panel-2: #2b241b;
+  --star-idle: #5a4e3e;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -60,7 +87,7 @@ header.site {
   position: sticky;
   top: 0;
   z-index: 30;
-  background: rgba(245, 240, 232, 0.96);
+  background: var(--header-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   box-shadow: 0 1px 3px rgba(0,0,0,0.06);
@@ -68,9 +95,35 @@ header.site {
 header.site .row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 1rem;
 }
+header.site nav.site { margin-left: auto; }
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: 0.25rem;
+  flex-shrink: 0;
+}
+.theme-toggle {
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.theme-toggle:hover { color: var(--gold); border-color: var(--gold); }
+.theme-toggle svg { width: 18px; height: 18px; }
+.theme-toggle .icon-sun { display: none; }
+html[data-theme='dark'] .theme-toggle .icon-sun { display: block; }
+html[data-theme='dark'] .theme-toggle .icon-moon { display: none; }
 .brand {
   display: flex;
   align-items: center;
@@ -226,13 +279,18 @@ section.player-section { padding-bottom: 4rem; }
 .screenshots {
   display: flex;
   gap: 1.5rem;
-  justify-content: center;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   padding: 0.5rem 0 1rem;
   max-width: 100%;
   margin: 0 auto;
+  scroll-snap-type: x proximity;
+  scroll-padding: 1.5rem;
 }
+/* auto-margins center the row without clipping the first item when it
+   overflows (a justify-content:center + overflow flexbox gotcha) */
+.screenshots img:first-child { margin-left: auto; }
+.screenshots img:last-child { margin-right: auto; }
 .screenshots img {
   width: 220px;
   height: auto;
@@ -242,6 +300,7 @@ section.player-section { padding-bottom: 4rem; }
   border: 1px solid var(--border);
   transition: transform 0.25s, box-shadow 0.25s;
   flex-shrink: 0;
+  scroll-snap-align: center;
 }
 .screenshots img:hover {
   transform: translateY(-4px);
@@ -254,7 +313,7 @@ footer.site {
   margin-top: 4rem;
   color: var(--text-muted);
   font-size: 0.9rem;
-  background: #e4ddd0;
+  background: var(--footer-bg);
 }
 footer.site .footer-grid {
   display: grid;
@@ -525,7 +584,7 @@ footer.site .footer-credit a:hover { color: var(--gold); }
   box-shadow: 0 0 0 1px var(--gold) inset;
 }
 .station-logo {
-  background: linear-gradient(135deg, #f0ebe2, #e4ddd0);
+  background: linear-gradient(135deg, var(--panel-1), var(--panel-2));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -578,7 +637,7 @@ footer.site .footer-credit a:hover { color: var(--gold); }
 .fav-btn {
   background: transparent;
   border: none;
-  color: #c8bfb0;
+  color: var(--star-idle);
   cursor: pointer;
   padding: 6px;
   border-radius: 8px;
@@ -879,7 +938,7 @@ footer.site .footer-credit a:hover { color: var(--gold); }
 .modal-icon-btn.ghost { cursor: default; }
 .modal-icon-btn:not(.ghost):hover { background: rgba(192,120,48,0.08); color: var(--gold); }
 .modal-icon-btn svg { width: 20px; height: 20px; }
-.modal-icon-btn.fav-modal { color: #a89888; }
+.modal-icon-btn.fav-modal { color: var(--star-idle); }
 .modal-icon-btn.fav-modal.active { color: var(--gold); }
 .modal-title {
   font-family: var(--font-serif);
@@ -900,7 +959,7 @@ footer.site .footer-credit a:hover { color: var(--gold); }
   border-radius: 12px;
   background:
     repeating-linear-gradient(180deg, rgba(0,0,0,0.05) 0 1px, transparent 1px 4px),
-    linear-gradient(180deg, #f0ebe2, #e4ddd0);
+    linear-gradient(180deg, var(--panel-1), var(--panel-2));
   border: 1px solid var(--border);
   margin-bottom: 1.25rem;
   box-shadow: inset 0 2px 4px rgba(0,0,0,0.03);
@@ -1022,7 +1081,7 @@ footer.site .footer-credit a:hover { color: var(--gold); }
 .modal-state .dot.error { background: var(--bg-red); }
 
 .vu-frame {
-  background: #e4ddd0;
+  background: var(--panel-2);
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 0.75rem;
@@ -1606,6 +1665,7 @@ button:focus-visible, a:focus-visible { outline-offset: 3px; }
     align-items: center;
     gap: 0.65rem;
   }
+  .header-actions { margin-left: auto; }
   nav.site {
     display: none;
     position: absolute;
@@ -1789,6 +1849,8 @@ button:focus-visible, a:focus-visible { outline-offset: 3px; }
   font-weight: 600;
   letter-spacing: 0.03em;
 }
+.station-listen { margin: 0.5rem 0 1.5rem; }
+
 .station-infobox {
   background: var(--bg-card);
   border: 1px solid var(--border-strong);
@@ -1823,6 +1885,178 @@ button:focus-visible, a:focus-visible { outline-offset: 3px; }
 }
 .station-infobox a {
   color: var(--gold);
+}
+
+/* ------------ Screen-reader-only text ------------ */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ------------ Loading skeleton ------------ */
+.skeleton {
+  display: grid;
+  gap: 6px;
+  text-align: left;
+}
+.sk-pills {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+}
+.sk-pills span {
+  width: 72px;
+  height: 28px;
+  border-radius: 999px;
+}
+.sk-row {
+  height: 54px;
+  border-radius: 10px;
+}
+.sk-pills span, .sk-row {
+  background: linear-gradient(90deg, var(--bg-elev) 25%, var(--bg-card-hover) 37%, var(--bg-elev) 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.4s ease infinite;
+}
+@keyframes shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: 0 0; }
+}
+
+/* ------------ Search clear button ------------ */
+.search-clear {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0;
+  transition: color 0.15s, background 0.15s;
+}
+.search-clear:hover { color: var(--gold); background: rgba(192,120,48,0.08); }
+.search-clear svg { width: 14px; height: 14px; }
+
+/* ------------ Mini-bar extras ------------ */
+.now-playing .np-sleep {
+  font-size: 0.7rem;
+  color: var(--gold-deep);
+  font-weight: 600;
+}
+
+/* Song title on the active station card (list view only) */
+.station-song {
+  font-size: 0.72rem;
+  color: var(--gold);
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}
+.station-song:empty { display: none; }
+.stations.view-grid .station-song { display: none; }
+
+/* Station whose stream failed on the last attempt */
+.station.broken { opacity: 0.55; }
+.station.broken .station-name::after {
+  content: ' ⚠';
+  color: var(--bg-red);
+  font-size: 0.8em;
+}
+
+/* "Try next station" affordance shown on stream errors (in the modal) */
+.err-next {
+  border: 1px solid var(--bg-red);
+  background: transparent;
+  color: var(--bg-red);
+  border-radius: 999px;
+  padding: 0.25rem 0.8rem;
+  margin-left: 0.5rem;
+  font-size: 0.75rem;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  letter-spacing: normal;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.err-next:hover { background: var(--bg-red); color: #ffffff; }
+
+/* ------------ Back to top ------------ */
+.back-to-top {
+  position: fixed;
+  right: 1rem;
+  bottom: calc(var(--np-h) + 1rem);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
+  background: var(--bg-card);
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 35;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(8px);
+  transition: opacity 0.2s, transform 0.2s, color 0.15s, border-color 0.15s;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+}
+.back-to-top.visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+.back-to-top:hover { color: var(--gold); border-color: var(--gold); }
+.back-to-top svg { width: 20px; height: 20px; }
+
+/* ------------ Favorites suggestions ------------ */
+.suggest-head {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem;
+}
+
+/* ------------ Genre-tinted station tags ------------ */
+/* light-dark() picks a readable hue per theme; unsupported browsers keep
+   the default gold tag color. */
+.station-tag.gc-pop { color: light-dark(#b34a72, #e08bab); }
+.station-tag.gc-rock { color: light-dark(#9c4a2e, #e08d6b); }
+.station-tag.gc-folk { color: light-dark(#7a7426, #cfc868); }
+.station-tag.gc-jazz { color: light-dark(#5c5aa8, #a3a1e8); }
+.station-tag.gc-classical { color: light-dark(#7c5aa0, #c3a3e6); }
+.station-tag.gc-news { color: light-dark(#2f6b8f, #7cc0e4); }
+.station-tag.gc-dance { color: light-dark(#b04ab0, #e68de6); }
+.station-tag.gc-electronic { color: light-dark(#2e7d72, #6fc9bd); }
+.station-tag.gc-hiphop { color: light-dark(#8a6116, #ddb35c); }
+.station-tag.gc-retro { color: light-dark(#a8503e, #e69582); }
+.station-tag.gc-chalga { color: light-dark(#b03a52, #e8869a); }
+.station-tag.gc-relax { color: light-dark(#4a7d4a, #93cc93); }
+
+/* ------------ FAQ open animation ------------ */
+.faq details[open] summary ~ p {
+  animation: faq-open 0.25s ease;
+}
+@keyframes faq-open {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* Reduced motion */
