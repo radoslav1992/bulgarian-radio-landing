@@ -196,14 +196,18 @@ class Player {
       });
     }
 
-    // Keyboard shortcuts
+    // Keyboard shortcuts (skip while typing or when a control has focus,
+    // so Space/Enter don't double-trigger focused buttons)
     document.addEventListener('keydown', (e) => {
-      if ((e.target as HTMLElement).tagName === 'INPUT') return;
+      const target = e.target as HTMLElement;
+      if (target.closest('input, textarea, select, button, [contenteditable]')) return;
       if (e.key === ' ' && !this.modal.classList.contains('visible')) { e.preventDefault(); this.toggle(); }
       if (e.key === 'ArrowLeft') this.step(-1);
       if (e.key === 'ArrowRight') this.step(1);
       if (e.key === 'm' || e.key === 'M') { this.audio.muted = !this.audio.muted; }
     });
+
+    this.setupMediaSession();
 
     document.addEventListener(STORE_EVENT, (e) => {
       const detail = (e as CustomEvent).detail as { kind: string };
@@ -235,6 +239,12 @@ class Player {
       if (this.mode === 'browse') {
         this.buildGenreFilters();
         this.buildCityFilters();
+      }
+      // Deep link: /?q=джаз#player prefills the search (also used by the
+      // sitelinks SearchAction in the structured data).
+      if (this.searchEl) {
+        const q = new URLSearchParams(window.location.search).get('q');
+        if (q) this.searchEl.value = q;
       }
       this.applyFilter();
       this.setupInfiniteScroll();
@@ -281,7 +291,13 @@ class Player {
     this.stationsEl.innerHTML = '';
     this.stationCards.clear();
     this.updateCount();
-    this.renderNextBatch();
+    if (this.filtered.length === 0 && this.all.length > 0) {
+      this.stationsEl.innerHTML =
+        '<p class="empty">Няма станции, отговарящи на търсенето.<br>Опитайте с друга дума или премахнете филтрите.</p>';
+      this.sentinelEl.style.display = 'none';
+    } else {
+      this.renderNextBatch();
+    }
     this.updateNavButtons();
   }
 
@@ -401,6 +417,7 @@ class Player {
       if (this.npSongEl) this.npSongEl.textContent = song;
       const modalSong = document.querySelector<HTMLElement>('[data-modal-song]');
       if (modalSong) modalSong.textContent = song;
+      if (this.current) this.updateMediaSession(this.current, song);
     } catch { /* ignore */ }
   }
 
@@ -454,7 +471,7 @@ class Player {
     card.setAttribute('role', 'button');
     card.tabIndex = 0;
     const tag = (s.tags.split(',')[0] || s.codec || '').trim();
-    const initial = s.name.charAt(0).toUpperCase();
+    const initial = safeInitial(s.name);
     const logo = s.favicon
       ? `<img src="${escapeAttr(s.favicon)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'fallback',textContent:'${initial}'}))" />`
       : `<span class="fallback">${initial}</span>`;
@@ -528,12 +545,15 @@ class Player {
     localStorage.setItem(STORAGE_KEY, s.stationuuid);
     addToHistory(s);
     this.updateNavButtons();
+    this.updateMediaSession(s);
   }
 
   private toggle() {
     if (!this.current) return;
     if (this.audio.paused) {
-      if (!this.audio.src) this.audio.src = this.current.url_resolved;
+      // Re-set the source so resuming rejoins the live stream instead of
+      // replaying stale buffered audio.
+      this.audio.src = this.current.url_resolved;
       void this.audio.play().catch(() => this.setState('error'));
     } else {
       this.audio.pause();
@@ -573,7 +593,7 @@ class Player {
 
   private showNowPlaying(s: Station, state: PlayState) {
     this.nowPlaying.classList.add('visible');
-    const initial = s.name.charAt(0).toUpperCase();
+    const initial = safeInitial(s.name);
     const logoHtml = s.favicon
       ? `<img src="${escapeAttr(s.favicon)}" alt="" referrerpolicy="no-referrer" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'fallback',textContent:'${initial}'}))" />`
       : `<span class="fallback">${initial}</span>`;
@@ -582,6 +602,10 @@ class Player {
     this.modalLogo.innerHTML = logoHtml;
     this.modalName.textContent = s.name;
     this.modalLang.textContent = s.language || s.country || '';
+    // Clear the previous station's song title until the next poll.
+    if (this.npSongEl) this.npSongEl.textContent = '';
+    const modalSong = document.querySelector<HTMLElement>('[data-modal-song]');
+    if (modalSong) modalSong.textContent = '';
     this.renderTags(s);
     this.refreshFavStars();
     this.updateVoteDisplay(s);
@@ -685,6 +709,9 @@ class Player {
     this.npToggle.setAttribute('aria-label', ariaLabel);
     this.modalToggle.setAttribute('aria-label', ariaLabel);
     this.modalVu.classList.toggle('animating', state === 'playing');
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.playbackState = state === 'playing' ? 'playing' : 'paused';
+    }
     if (state === 'playing') this.startSongPoll(); else this.stopSongPoll();
     if (this.current) {
       const isActive = !this.audio.paused;
@@ -697,6 +724,28 @@ class Player {
       el.classList.toggle('active', id === activeId);
     }
   }
+
+  /** Lock-screen / hardware-key controls via the Media Session API. */
+  private setupMediaSession() {
+    if (!('mediaSession' in navigator)) return;
+    try {
+      navigator.mediaSession.setActionHandler('play', () => this.toggle());
+      navigator.mediaSession.setActionHandler('pause', () => this.toggle());
+      navigator.mediaSession.setActionHandler('previoustrack', () => this.step(-1));
+      navigator.mediaSession.setActionHandler('nexttrack', () => this.step(1));
+    } catch { /* unsupported action */ }
+  }
+
+  private updateMediaSession(s: Station, song = '') {
+    if (!('mediaSession' in navigator)) return;
+    try {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: song || s.name,
+        artist: song ? s.name : 'Радио България',
+        artwork: s.favicon ? [{ src: s.favicon }] : [{ src: '/logo-512.png', sizes: '512x512', type: 'image/png' }],
+      });
+    } catch { /* ignore malformed artwork URLs */ }
+  }
 }
 
 const ICON_PLAY =
@@ -708,6 +757,15 @@ const ICON_STAR =
 
 function escapeHtml(s: string) {
   return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
+}
+
+/**
+ * First letter of a station name, restricted to letters/digits so it is safe
+ * to interpolate into the inline onerror fallback string.
+ */
+function safeInitial(name: string) {
+  const m = name.trim().match(/[\p{L}\p{N}]/u);
+  return (m ? m[0] : '♪').toUpperCase();
 }
 function escapeAttr(s: string) {
   return escapeHtml(s);
