@@ -52,6 +52,18 @@ const jsonLd = {
   <article class="container legal blog-post">
     <h1>{station.data.name}</h1>
 
+    <p class="station-listen">
+      <button
+        class="cta"
+        type="button"
+        data-play-station={station.data.playerQuery ?? station.data.name}
+        data-play-fallback={station.data.name}
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Слушай на живо
+      </button>
+    </p>
+
     <div class="station-infobox">
       <table>
         {station.data.format && <tr><th>Формат</th><td>{station.data.format}</td></tr>}
@@ -92,9 +104,17 @@ const jsonLd = {
     )}
 
     <div class="blog-cta">
-      <p>Потърсете {station.data.name} в нашия уеб плейър или слушайте директно от официалния сайт на станцията.</p>
+      <p>Пуснете {station.data.name} направо оттук — плейърът продължава да свири, докато разглеждате сайта.</p>
       <div class="hero-ctas">
-        <a class="cta cta-secondary" href="/#player">Търси в плейъра</a>
+        <button
+          class="cta"
+          type="button"
+          data-play-station={station.data.playerQuery ?? station.data.name}
+          data-play-fallback={station.data.name}
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Слушай на живо
+        </button>
         {station.data.website && (
           <a class="cta cta-secondary" href={station.data.website} target="_blank" rel="noopener noreferrer">Официален сайт</a>
         )}
