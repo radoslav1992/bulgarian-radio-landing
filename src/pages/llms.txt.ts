@@ -36,7 +36,7 @@ Bulgarian stations live in the browser, no sign-up required. Content is in Bulga
 - [Справочник на станциите](${SITE}/stations): история, формат, честоти и собственост на българските радиа
 - [Блог](${SITE}/blog): статии за българското радио и музика
 - [За нас](${SITE}/about): информация за проекта
-- [Контакт](${SITE}/contact): contact@bulgariaradio.com
+- [Контакт](${SITE}/contact): info@bulgariaradio.com
 
 ## Радио станции
 
