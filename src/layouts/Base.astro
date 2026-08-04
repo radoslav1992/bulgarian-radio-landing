@@ -15,8 +15,12 @@ interface Props {
   jsonLd?: object | object[];
   /** ISO date string for article:published_time (blog posts). */
   publishedTime?: string;
+  /** ISO date string for article:modified_time. */
+  modifiedTime?: string;
   /** Author name for article:author (blog posts). */
   articleAuthor?: string;
+  /** Author for the <meta name="author"> tag (defaults to the site name). */
+  metaAuthor?: string;
   /** Set true to add noindex (e.g. user-specific pages). */
   noindex?: boolean;
   /** OG article tags for blog posts. */
@@ -35,7 +39,9 @@ const {
   ogType = 'website',
   jsonLd,
   publishedTime,
+  modifiedTime,
   articleAuthor,
+  metaAuthor = SITE_NAME,
   noindex = false,
   articleTags = [],
 } = Astro.props;
@@ -55,6 +61,7 @@ const orgJsonLd = {
   logo: `${SITE_URL}/logo.png`,
   email: 'contact@bulgariaradio.com',
   description: DEFAULT_DESC,
+  foundingDate: '2026-05-26',
   areaServed: { '@type': 'Country', name: 'България' },
 };
 const jsonLdArr = [orgJsonLd, ...(jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [])];
@@ -82,6 +89,7 @@ const jsonLdArr = [orgJsonLd, ...(jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [js
       })();
     </script>
     <meta name="description" content={description} />
+    <meta name="author" content={metaAuthor} />
     <meta name="robots" content={noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large'} />
     <meta name="format-detection" content="telephone=no" />
     <meta name="geo.region" content="BG" />
@@ -102,6 +110,7 @@ const jsonLdArr = [orgJsonLd, ...(jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [js
     <meta property="og:image:alt" content={`${SITE_NAME} — лого`} />
     <meta property="og:locale" content="bg_BG" />
     {publishedTime && <meta property="article:published_time" content={publishedTime} />}
+    {modifiedTime && <meta property="article:modified_time" content={modifiedTime} />}
     {articleAuthor && <meta property="article:author" content={articleAuthor} />}
     {articleTags.map((tag) => <meta property="article:tag" content={tag} />)}
 
