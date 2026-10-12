@@ -1,16 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#14b8a6"/>
-      <stop offset="100%" stop-color="#0d9488"/>
-    </linearGradient>
-  </defs>
-  <rect width="512" height="512" rx="108" fill="url(#bg)"/>
-  <path d="M148 298A153 153 0 0 1 364 298" fill="none" stroke="#fff" stroke-width="30" stroke-linecap="round" opacity=".3"/>
-  <path d="M192 262A90 90 0 0 1 320 262" fill="none" stroke="#fff" stroke-width="30" stroke-linecap="round" opacity=".6"/>
-  <path d="M230 232A37 37 0 0 1 282 232" fill="none" stroke="#fff" stroke-width="30" stroke-linecap="round"/>
-  <circle cx="256" cy="320" r="30" fill="#fff"/>
-  <rect x="106" y="400" width="100" height="12" rx="6" fill="rgba(255,255,255,.82)"/>
-  <rect x="206" y="400" width="100" height="12" fill="#4ade80"/>
-  <rect x="306" y="400" width="100" height="12" rx="6" fill="#f87171"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><title>Радио България</title><defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1D2436"/><stop offset="1" stop-color="#090C14"/></linearGradient><radialGradient id="glow" cx="220" cy="206" r="104" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FF3B47" stop-opacity=".55"/><stop offset="1" stop-color="#FF3B47" stop-opacity="0"/></radialGradient></defs><rect width="512" height="512" rx="116" fill="url(#bg)"/><circle cx="220" cy="206" r="78.0" fill="url(#glow)"/><g fill="none" stroke-linecap="round"><path d="M147.8 131.2A104 104 0 1 1 147.8 280.8M147.8 102V410" stroke="#FFF" stroke-width="52"/><path d="M352.4 102.6A168 168 0 0 1 352.4 309.4" stroke="#16C98D" stroke-width="34"/></g><circle cx="220" cy="206" r="31" fill="#FF3B47"/></svg>
