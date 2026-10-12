@@ -1,8 +1,7 @@
 import type { APIRoute } from 'astro';
+import { radioBrowserFetch } from '../../lib/radio-browser';
 
 export const prerender = false;
-
-const API_VOTE = 'https://de1.api.radio-browser.info/json/vote/';
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -14,7 +13,10 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    const res = await fetch(API_VOTE + encodeURIComponent(uuid), { method: 'POST' });
+    const res = await radioBrowserFetch(`/json/vote/${encodeURIComponent(uuid)}`, {
+      method: 'POST',
+      timeoutMs: 5_000,
+    });
     const data = await res.json();
 
     return new Response(JSON.stringify(data), {
