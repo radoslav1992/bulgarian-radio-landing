@@ -1,7 +1,9 @@
-const CACHE_VERSION = 'radio-bg-v2';
+const CACHE_VERSION = 'radio-bg-v3';
 const APP_SHELL = [
   '/',
   '/logo.png',
+  '/logo-512.png',
+  '/icon-192.png',
   '/favicon.png',
   '/favicon.svg',
   '/logo.svg',
