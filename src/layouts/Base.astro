@@ -1,5 +1,6 @@
 ---
 import { ViewTransitions } from 'astro:transitions';
+import LogoMark from '../components/LogoMark.astro';
 import '../styles/global.css';
 
 interface Props {
@@ -30,7 +31,7 @@ interface Props {
 const SITE_URL = 'https://bulgariaradio.com';
 const SITE_NAME = 'Радио България';
 const DEFAULT_DESC = 'Слушай безплатно над 100 български радио станции онлайн — поп, рок, фолк, дип хаус и още. Директно в браузъра, без регистрация.';
-const DEFAULT_OG_IMAGE = '/og-image.png';
+const DEFAULT_OG_IMAGE = '/og-image.jpg';
 
 const {
   title,
@@ -74,20 +75,17 @@ const jsonLdArr = [orgJsonLd, ...(jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [js
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
-    <meta name="theme-color" content="#f5f6f8" />
-    {/* Apply the saved/system theme before first paint to avoid a flash. */}
+    <meta name="theme-color" content="#070c1c" />
+    {/* Apply the saved theme (dark by default) before first paint to avoid a flash. */}
     <script is:inline data-astro-rerun>
       (() => {
-        let theme = 'light';
+        let theme = 'dark';
         try {
-          const stored = localStorage.getItem('br-theme');
-          theme = stored === 'dark' || stored === 'light'
-            ? stored
-            : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+          if (localStorage.getItem('br-theme') === 'light') theme = 'light';
         } catch {}
         document.documentElement.dataset.theme = theme;
         const m = document.querySelector('meta[name="theme-color"]');
-        if (m) m.setAttribute('content', theme === 'dark' ? '#0a0c11' : '#f5f6f8');
+        if (m) m.setAttribute('content', theme === 'dark' ? '#070c1c' : '#f3f5fb');
       })();
     </script>
     <meta name="description" content={description} />
@@ -130,14 +128,14 @@ const jsonLdArr = [orgJsonLd, ...(jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [js
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Jost:wght@500;600;700&family=Manrope:wght@400;500;600;700&family=Oswald:wght@500&display=swap"
       rel="stylesheet"
       media="print"
       onload="this.media='all'"
     />
     <noscript>
       <link
-        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@500;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Jost:wght@500;600;700&family=Manrope:wght@400;500;600;700&family=Oswald:wght@500&display=swap"
         rel="stylesheet"
       />
     </noscript>
@@ -170,9 +168,9 @@ const jsonLdArr = [orgJsonLd, ...(jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [js
 
     <header class="site">
       <div class="container row">
-        <a class="brand" href="/">
-          <img src="/logo.svg" alt="" width="38" height="38" />
-          <span class="brand-name">Радио България</span>
+        <a class="brand" href="/" aria-label="Радио България — начало">
+          <LogoMark size={36} />
+          <span class="brand-name"><b>Радио</b> България</span>
         </a>
         <nav class="site" id="main-nav" aria-label="Основна навигация">
           <a href="/" class:list={{ active: isActive('/') }}>Слушай</a>
@@ -207,9 +205,9 @@ const jsonLdArr = [orgJsonLd, ...(jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [js
     <footer class="site">
       <div class="container footer-grid">
         <div class="footer-col footer-brand">
-          <a class="brand" href="/">
-            <img src="/logo.svg" alt="" width="38" height="38" />
-            <span>Радио България</span>
+          <a class="brand" href="/" aria-label="Радио България — начало">
+            <LogoMark size={34} />
+            <span class="brand-name"><b>Радио</b> България</span>
           </a>
           <p>Безплатен достъп до български радио станции — директно в браузъра. Android приложение очаквайте скоро.</p>
         </div>
@@ -299,7 +297,7 @@ const jsonLdArr = [orgJsonLd, ...(jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [js
             </svg>
           </button>
           <div class="modal-title">
-            <img src="/favicon.svg" alt="" width="20" height="20" />
+            <LogoMark size={20} />
             Радио България
           </div>
           <button class="modal-icon-btn fav-modal" data-modal-fav type="button" aria-label="Добави в любими" aria-pressed="false">
@@ -418,7 +416,7 @@ const jsonLdArr = [orgJsonLd, ...(jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [js
       function applyTheme(theme: 'light' | 'dark') {
         document.documentElement.dataset.theme = theme;
         document.querySelector('meta[name="theme-color"]')
-          ?.setAttribute('content', theme === 'dark' ? '#0a0c11' : '#f5f6f8');
+          ?.setAttribute('content', theme === 'dark' ? '#070c1c' : '#f3f5fb');
       }
 
       // PWA install: when the browser offers installability, turn the
@@ -483,6 +481,16 @@ const jsonLdArr = [orgJsonLd, ...(jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [js
           return;
         }
 
+        const arrow = t.closest<HTMLElement>('[data-carousel-prev], [data-carousel-next]');
+        if (arrow) {
+          const track = arrow.closest('[data-carousel]')?.querySelector<HTMLElement>('[data-carousel-track]');
+          if (track) {
+            const dir = arrow.hasAttribute('data-carousel-prev') ? -1 : 1;
+            track.scrollBy({ left: dir * track.clientWidth * 0.85, behavior: 'smooth' });
+          }
+          return;
+        }
+
         if (t.closest('[data-back-to-top]')) {
           window.scrollTo({ top: 0, behavior: 'smooth' });
           return;
@@ -503,12 +511,9 @@ const jsonLdArr = [orgJsonLd, ...(jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [js
       // The router swaps in the new document's <html> attributes — re-apply
       // the chosen theme before the new page paints.
       document.addEventListener('astro:after-swap', () => {
-        let theme: 'light' | 'dark' = 'light';
+        let theme: 'light' | 'dark' = 'dark';
         try {
-          const stored = localStorage.getItem(THEME_KEY);
-          theme = stored === 'dark' || stored === 'light'
-            ? stored
-            : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+          if (localStorage.getItem(THEME_KEY) === 'light') theme = 'light';
         } catch {}
         applyTheme(theme);
       });

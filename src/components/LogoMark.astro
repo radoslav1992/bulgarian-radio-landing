@@ -1,0 +1,25 @@
+---
+/**
+ * The "Р" broadcast mark without its app-icon tile, for use on page chrome.
+ * The letter follows `currentColor` so it adapts to light/dark themes.
+ */
+interface Props {
+  size?: number;
+  class?: string;
+}
+const { size = 40, class: className } = Astro.props;
+---
+<svg
+  class:list={['logo-mark', className]}
+  viewBox="118 72 291 368"
+  width={Math.round(size * 0.79)}
+  height={size}
+  aria-hidden="true"
+  focusable="false"
+>
+  <g fill="none" stroke-linecap="round">
+    <path d="M147.8 131.2A104 104 0 1 1 147.8 280.8M147.8 102V410" stroke="currentColor" stroke-width="52" />
+    <path d="M352.4 102.6A168 168 0 0 1 352.4 309.4" stroke="#5ef2e9" stroke-width="34" />
+  </g>
+  <circle cx="220" cy="206" r="31" fill="#ff3fbf" />
+</svg>

@@ -3,8 +3,8 @@
   "short_name": "Радио БГ",
   "start_url": "/",
   "display": "standalone",
-  "theme_color": "#f5f6f8",
-  "background_color": "#f5f6f8",
+  "theme_color": "#070c1c",
+  "background_color": "#070c1c",
   "description": "Слушайте любимите български радио станции на едно място — музика, новини и забавление на живо.",
   "icons": [
     {

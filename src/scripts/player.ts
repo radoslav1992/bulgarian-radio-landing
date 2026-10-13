@@ -292,6 +292,7 @@ function setState(st: PlayState) {
   npToggle.setAttribute('aria-label', ariaLabel);
   modalToggle.setAttribute('aria-label', ariaLabel);
   modalVu.classList.toggle('animating', st === 'playing');
+  renderHero();
   if ('mediaSession' in navigator) {
     navigator.mediaSession.playbackState = st === 'playing' ? 'playing' : 'paused';
   }
@@ -1002,6 +1003,62 @@ function restoreLastStation() {
   } catch { /* old uuid-only format or corrupt entry — ignore */ }
 }
 
+// ---------------------------------------------------------------------------
+// Home hero: the big play button and its featured-station card. Plays the
+// last station if there is one, otherwise the most-listened station.
+// ---------------------------------------------------------------------------
+
+let featured: Station | null = null;
+
+function renderHero() {
+  const hero = document.querySelector<HTMLElement>('[data-hero]');
+  if (!hero) return;
+  const playing = state === 'playing' && !!current;
+  const btn = hero.querySelector<HTMLButtonElement>('[data-hero-play]');
+  if (btn) {
+    btn.innerHTML = playing ? ICON_PAUSE : ICON_PLAY;
+    btn.setAttribute('aria-label', playing ? 'Пауза' : 'Пусни радио');
+    btn.classList.toggle('playing', playing);
+  }
+  const s = current ?? featured;
+  if (!s) return;
+  const set = (sel: string, text: string) => {
+    const el = hero.querySelector<HTMLElement>(sel);
+    if (el) el.textContent = text;
+  };
+  const logo = hero.querySelector<HTMLElement>('[data-hero-logo]');
+  if (logo && logo.dataset.uuid !== s.stationuuid) {
+    logo.innerHTML = logoHtmlFor(s);
+    logo.dataset.uuid = s.stationuuid;
+  }
+  set('[data-hero-status]', playing ? 'В ефир сега' : current ? 'Последно слушано' : 'Най-слушана станция');
+  set('[data-hero-name]', s.name);
+  const tags = (s.tags || '').split(',').map((t) => t.trim()).filter(Boolean).slice(0, 2);
+  set('[data-hero-meta]', tags.length ? tags.join(' · ') : s.language || 'Онлайн радио');
+  hero.querySelector('[data-hero-status]')?.classList.toggle('live', playing);
+}
+
+async function initHero() {
+  if (!document.querySelector('[data-hero]')) return;
+  renderHero();
+  if (current) return;
+  try {
+    featured = (await ensureCatalog())[0] ?? null;
+    renderHero();
+  } catch { /* keep the static fallback copy */ }
+}
+
+async function heroPlay() {
+  if (current) { toggle(); return; }
+  try {
+    const cat = await ensureCatalog();
+    const s = featured ?? cat[0];
+    if (s) playStation(s, cat);
+  } catch {
+    document.querySelector('#player')?.scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
 /** "Listen live" buttons on station directory pages. */
 async function handlePlayButton(btn: HTMLElement) {
   const query = btn.dataset.playStation || '';
@@ -1040,8 +1097,10 @@ document.addEventListener('keydown', (e) => {
 });
 
 document.addEventListener('click', (e) => {
-  const btn = (e.target as HTMLElement).closest<HTMLElement>('[data-play-station]');
+  const target = e.target as HTMLElement;
+  const btn = target.closest<HTMLElement>('[data-play-station]');
   if (btn) void handlePlayButton(btn);
+  if (target.closest('[data-hero-play]')) void heroPlay();
 });
 
 document.addEventListener(STORE_EVENT, (e) => {
@@ -1056,6 +1115,7 @@ document.addEventListener('astro:page-load', () => {
   const root = document.querySelector<HTMLElement>('[data-player]');
   listUI = root ? new ListUI(root) : null;
   void listUI?.init();
+  void initHero();
 });
 
 bindDock();

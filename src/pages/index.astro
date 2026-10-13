@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import Feature from '../components/Feature.astro';
 import RadioPlayer from '../components/RadioPlayer.astro';
+import LogoMark from '../components/LogoMark.astro';
 import { getCollection } from 'astro:content';
 
 const latestPosts = (await getCollection('blog'))
@@ -15,6 +16,23 @@ const DATE_PUBLISHED = '2026-05-26';
 const DATE_MODIFIED = '2026-08-04';
 const fmtDate = (iso: string) =>
   new Date(iso).toLocaleDateString('bg-BG', { year: 'numeric', month: 'long', day: 'numeric' });
+
+// "Станции на фокус" carousel: the directory profiles, each with a tinted
+// crop of the hero artwork as its cover.
+const COVER_HUES = [0, 38, -34, 62, -18, 24, -52, 48];
+const spotlight = (await getCollection('stations'))
+  .sort((a, b) => a.data.name.localeCompare(b.data.name, 'bg'))
+  .map((st, i) => {
+    const m = st.data.frequencies[0]?.match(/^(.*?)\s*(\d{2,3}[.,]\d)\s*(FM|MHz)?/i);
+    return {
+      slug: st.slug,
+      name: st.data.name,
+      format: st.data.format,
+      playQuery: st.data.playerQuery ?? st.data.name,
+      freq: m ? { city: m[1], num: m[2].replace(',', '.'), unit: m[3] ?? 'FM' } : null,
+      coverStyle: `--hue:${COVER_HUES[i % COVER_HUES.length]}deg;--pos:${(i * 29) % 100}% ${(i * 47) % 100}%`,
+    };
+  });
 
 const features = [
   {
@@ -150,157 +168,228 @@ const jsonLd = [
   publishedTime={DATE_PUBLISHED}
   modifiedTime={DATE_MODIFIED}
 >
-  <section class="hero">
-    <div class="hero-bg" aria-hidden="true"></div>
-    <div class="container hero-grid">
-      <div class="hero-copy">
-        <span class="eyebrow"><span class="live-dot" aria-hidden="true"></span>На живо · 100+ български станции</span>
-        <h1>Радио <span class="grad-text">България</span></h1>
-        <p class="tagline">
-          Слушай безплатно над 100 български радио станции — поп, рок, фолк, дип хаус, новини и още.
-          Директно в браузъра, без регистрация.
-        </p>
-        <div class="hero-ctas">
-          <a class="cta" href="#player">
-            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.14v13.72a1 1 0 0 0 1.52.85l11.02-6.86a1 1 0 0 0 0-1.7L9.52 4.29A1 1 0 0 0 8 5.14z"/></svg>
-            Слушай онлайн
-          </a>
-          <span class="cta cta-coming-soon" id="download">
-            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 20.5V3.5c0-.6.3-1.1.8-1.4L13.5 12 3.8 21.9c-.5-.3-.8-.8-.8-1.4zm10.6-8.5l2.5-2.5L5.5 3.4c-.3-.2-.6-.3-.9-.3l9 8.9zm6.5-3.7L17.5 9.7l-2.7 2.3 2.7 2.3 2.6-1.4c.8-.5.8-1.7 0-2.1zM4.6 20.9c.3 0 .6-.1.9-.3l10.6-6.1-2.5-2.5-9 8.9z"/></svg>
-            Android — очаквайте скоро
-          </span>
-        </div>
-        <ul class="trust-row" aria-label="Кратки факти">
-          <li><strong>100+</strong> станции</li>
-          <li><strong>0 лв</strong> безплатно</li>
-          <li><strong>Без</strong> регистрация</li>
-        </ul>
-      </div>
-      <div class="hero-visual">
-        <div class="hv-rings" aria-hidden="true"><span></span><span></span><span></span></div>
-        <img class="hero-logo" src="/logo.svg" alt="Радио България — лого" width="220" height="220" fetchpriority="high" />
-        <span class="hv-chip c1" aria-hidden="true">Поп</span>
-        <span class="hv-chip c2" aria-hidden="true">Фолк</span>
-        <span class="hv-chip c3" aria-hidden="true">Джаз</span>
-        <span class="hv-chip hv-live" aria-hidden="true"><span class="eq"><i></i><i></i><i></i></span>В ефир</span>
-      </div>
-    </div>
-  </section>
-
-  <section id="player" class="container player-section">
-    <div class="section-head">
-      <span class="section-kicker">Плейър</span>
-      <h2>Слушай на живо</h2>
-      <p>Истински български радио станции, директно в браузъра — без инсталация, без регистрация.</p>
-    </div>
-    <RadioPlayer />
-  </section>
-
-  <section id="features" class="container">
-    <div class="section-head">
-      <span class="section-kicker">Възможности</span>
-      <h2>Защо Радио България</h2>
-      <p>Всичко необходимо, за да слушаш българско радио — без излишни функции.</p>
-    </div>
-    <div class="features features-six">
-      {features.map((f) => <Feature title={f.title} description={f.description} icon={f.icon} />)}
-    </div>
-  </section>
-
-  <section class="container">
-    <div class="section-head">
-      <span class="section-kicker">Android приложение</span>
-      <h2>Така изглежда приложението</h2>
-      <p>Просто, чисто и в твоя стил.</p>
-    </div>
-    <div class="screenshots">
-      <img src="/screenshots/home.png" alt="Списък с български радио станции" loading="lazy" decoding="async" width="1080" height="2404" />
-      <img src="/screenshots/favorites.png" alt="Любими станции" loading="lazy" decoding="async" width="1080" height="2404" />
-      <img src="/screenshots/history.png" alt="История на слушане" loading="lazy" decoding="async" width="1080" height="2404" />
-      <img src="/screenshots/player.png" alt="Ретро плейър със зелен скалател" loading="lazy" decoding="async" width="1080" height="2404" />
-    </div>
-  </section>
-
-  <section class="container about-strip">
-    <div class="section-head">
-      <span class="section-kicker">За проекта</span>
-      <h2>Кратко за нас</h2>
-    </div>
-    <div class="prose">
-      <p>
-        Радио България е малък независим проект, чиято цел е да направи родното радио лесно достъпно
-        — на всяко устройство, навсякъде по света. Приложението е направено от любители на българската
-        музика и не е свързано с конкретна радиостанция или медийна група.
-      </p>
-      <p>
-        Каталогът се захранва от <a href="https://www.radio-browser.info" target="_blank" rel="noopener noreferrer">Radio Browser</a>
-        — отворена, общностно поддържана база данни. Самото съдържание (музика, новини, реклами)
-        принадлежи на съответните радиа.
-      </p>
-      <p><a class="link-arrow" href="/about">Прочети повече за проекта →</a></p>
-      <p class="page-byline">
-        Автор: <a href="/about">Екипът на Радио България</a>
-        · Публикувано: <time datetime={DATE_PUBLISHED}>{fmtDate(DATE_PUBLISHED)}</time>
-        · Обновено: <time datetime={DATE_MODIFIED}>{fmtDate(DATE_MODIFIED)}</time>
-      </p>
-    </div>
-  </section>
-
-  <section class="container">
-    <div class="section-head">
-      <span class="section-kicker">Блог</span>
-      <h2>От блога</h2>
-      <p>Статии за българското радио, музика и полезни съвети.</p>
-    </div>
-    <div class="blog-grid blog-grid-home">
-      {latestPosts.map((post) => (
-        <a href={`/blog/${post.slug}`} class="blog-card">
-          <div class="blog-card-body">
-            <div class="blog-card-tags">
-              {post.data.tags.map((tag) => (
-                <span class="tag-chip">{tag}</span>
-              ))}
-            </div>
-            <h3>{post.data.title}</h3>
-            <p>{post.data.description}</p>
-            <time datetime={post.data.date}>{fmtDate(post.data.date)}</time>
-          </div>
-        </a>
-      ))}
-    </div>
-    <div style="text-align:center; margin-top:2rem;">
-      <a class="link-arrow" href="/blog">Всички статии →</a>
-    </div>
-  </section>
-
-  <section id="faq" class="container">
-    <div class="section-head">
-      <span class="section-kicker">Въпроси</span>
-      <h2>Често задавани въпроси</h2>
-      <p>Кратки отговори на най-честите въпроси за приложението.</p>
-    </div>
-    <div class="faq">
-      {faqs.map((f) => (
-        <details>
-          <summary>{f.q}</summary>
-          <p>{f.a}</p>
-        </details>
-      ))}
-    </div>
-  </section>
-
-  <section class="container cta-section">
-    <h2>Готов за слушане?</h2>
-    <p>Пуснете любимата си станция директно в браузъра — безплатно и без регистрация.</p>
-    <div class="hero-ctas">
-      <a class="cta" href="#player">
+  <section class="hero" data-hero>
+    <img
+      class="hero-bg"
+      src="/art/hero-waves-1600.webp"
+      srcset="/art/hero-waves-900.webp 900w, /art/hero-waves-1600.webp 1600w"
+      sizes="100vw"
+      alt=""
+      width="1600"
+      height="1000"
+      fetchpriority="high"
+    />
+    <div class="container hero-inner">
+      <button class="hero-play" type="button" data-hero-play aria-label="Пусни радио">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.14v13.72a1 1 0 0 0 1.52.85l11.02-6.86a1 1 0 0 0 0-1.7L9.52 4.29A1 1 0 0 0 8 5.14z"/></svg>
-        Слушай онлайн
-      </a>
-      <span class="cta cta-coming-soon">
+      </button>
+      <h1>Слушай на живо с <span class="neon">Радио България</span></h1>
+      <p class="tagline">
+        Слушай безплатно над 100 български радио станции — поп, рок, фолк, дип хаус, новини и още.
+        Директно в браузъра, без регистрация.
+      </p>
+
+      <div class="hero-feature">
+        <div class="hf-cover" data-hero-logo><LogoMark size=64 /></div>
+        <div class="hf-text">
+          <p class="hf-status" data-hero-status>Най-слушани днес</p>
+          <p class="hf-name" data-hero-name>100+ български станции</p>
+          <p class="hf-meta" data-hero-meta>Поп, рок, фолк, джаз и новини</p>
+          <a class="hf-link" href="#player">Пусни музиката</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="stats-strip" aria-label="Кратки факти">
+    <div class="container stats-inner">
+      <ul class="trust-row">
+        <li><strong>100+</strong> станции</li>
+        <li><strong>0 лв</strong> безплатно</li>
+        <li><strong>Без</strong> регистрация</li>
+      </ul>
+      <span class="cta cta-coming-soon" id="download">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 20.5V3.5c0-.6.3-1.1.8-1.4L13.5 12 3.8 21.9c-.5-.3-.8-.8-.8-1.4zm10.6-8.5l2.5-2.5L5.5 3.4c-.3-.2-.6-.3-.9-.3l9 8.9zm6.5-3.7L17.5 9.7l-2.7 2.3 2.7 2.3 2.6-1.4c.8-.5.8-1.7 0-2.1zM4.6 20.9c.3 0 .6-.1.9-.3l10.6-6.1-2.5-2.5-9 8.9z"/></svg>
         Android — очаквайте скоро
       </span>
+    </div>
+  </section>
+
+  <section id="player" class="band band-alt player-section">
+    <div class="container">
+      <div class="section-head">
+        <span class="section-kicker">На живо</span>
+        <h2>Слушай на живо</h2>
+        <p>Истински български радио станции, директно в браузъра — без инсталация, без регистрация.</p>
+      </div>
+      <RadioPlayer />
+    </div>
+  </section>
+
+  <section class="band spotlight" data-carousel aria-roledescription="carousel" aria-label="Станции на фокус">
+    <div class="container">
+      <div class="section-head">
+        <span class="section-kicker">Справочник</span>
+        <h2>Станции на фокус</h2>
+        <p>История, честоти и формат на най-известните български радиа.</p>
+      </div>
+      <div class="sl-track" data-carousel-track>
+        {spotlight.map((st) => (
+          <article class="sl-card">
+            <div class="sl-cover" style={st.coverStyle}>
+              <img src="/art/hero-waves-900.webp" alt="" width="900" height="563" loading="lazy" decoding="async" />
+              {st.freq ? (
+                <span class="sl-freq">{st.freq.num} <small>{st.freq.unit}</small><em>{st.freq.city}</em></span>
+              ) : (
+                <span class="sl-freq sl-freq-text">Онлайн</span>
+              )}
+              <button
+                class="sl-play"
+                type="button"
+                data-play-station={st.playQuery}
+                data-play-fallback={st.name}
+                aria-label={`Пусни ${st.name}`}
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.14v13.72a1 1 0 0 0 1.52.85l11.02-6.86a1 1 0 0 0 0-1.7L9.52 4.29A1 1 0 0 0 8 5.14z"/></svg>
+              </button>
+            </div>
+            <h3><a href={`/stations/${st.slug}`}>{st.name}</a></h3>
+            <p>{st.format}</p>
+          </article>
+        ))}
+      </div>
+      <div class="carousel-nav">
+        <button class="sq-btn" type="button" data-carousel-prev aria-label="Предишни станции">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <button class="sq-btn" type="button" data-carousel-next aria-label="Следващи станции">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+      </div>
+      <p class="center-link"><a class="link-arrow" href="/stations">Всички станции →</a></p>
+    </div>
+  </section>
+
+  <section class="band band-deep about-strip">
+    <div class="container about-grid">
+      <figure class="about-art">
+        <img src="/art/vinyl.svg" alt="Винилова плоча с логото на Радио България" width="1200" height="800" loading="lazy" decoding="async" />
+      </figure>
+      <div class="about-copy">
+        <span class="section-kicker">За проекта</span>
+        <h2>Кратко за нас</h2>
+        <div class="prose">
+          <p>
+            Радио България е малък независим проект, чиято цел е да направи родното радио лесно достъпно
+            — на всяко устройство, навсякъде по света. Приложението е направено от любители на българската
+            музика и не е свързано с конкретна радиостанция или медийна група.
+          </p>
+          <p>
+            Каталогът се захранва от <a href="https://www.radio-browser.info" target="_blank" rel="noopener noreferrer">Radio Browser</a>
+            — отворена, общностно поддържана база данни. Самото съдържание (музика, новини, реклами)
+            принадлежи на съответните радиа.
+          </p>
+        </div>
+        <a class="cta" href="/about">Прочети повече</a>
+        <p class="page-byline">
+          Автор: <a href="/about">Екипът на Радио България</a>
+          · Публикувано: <time datetime={DATE_PUBLISHED}>{fmtDate(DATE_PUBLISHED)}</time>
+          · Обновено: <time datetime={DATE_MODIFIED}>{fmtDate(DATE_MODIFIED)}</time>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" class="band band-alt">
+    <div class="container">
+      <div class="section-head">
+        <span class="section-kicker">Възможности</span>
+        <h2>Защо Радио България</h2>
+        <p>Всичко необходимо, за да слушаш българско радио — без излишни функции.</p>
+      </div>
+      <div class="features features-six">
+        {features.map((f) => <Feature title={f.title} description={f.description} icon={f.icon} />)}
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="container">
+      <div class="section-head">
+        <span class="section-kicker">Android приложение</span>
+        <h2>Така изглежда приложението</h2>
+        <p>Просто, чисто и в твоя стил.</p>
+      </div>
+      <div class="screenshots">
+        <img src="/screenshots/home.png" alt="Списък с български радио станции" loading="lazy" decoding="async" width="1080" height="2404" />
+        <img src="/screenshots/favorites.png" alt="Любими станции" loading="lazy" decoding="async" width="1080" height="2404" />
+        <img src="/screenshots/history.png" alt="История на слушане" loading="lazy" decoding="async" width="1080" height="2404" />
+        <img src="/screenshots/player.png" alt="Ретро плейър със зелен скалател" loading="lazy" decoding="async" width="1080" height="2404" />
+      </div>
+    </div>
+  </section>
+
+  <section class="band band-alt">
+    <div class="container">
+      <div class="section-head">
+        <span class="section-kicker">Блог</span>
+        <h2>От блога</h2>
+        <p>Статии за българското радио, музика и полезни съвети.</p>
+      </div>
+      <div class="blog-grid blog-grid-home">
+        {latestPosts.map((post) => (
+          <a href={`/blog/${post.slug}`} class="blog-card">
+            <div class="blog-card-body">
+              <div class="blog-card-tags">
+                {post.data.tags.map((tag) => (
+                  <span class="tag-chip">{tag}</span>
+                ))}
+              </div>
+              <h3>{post.data.title}</h3>
+              <p>{post.data.description}</p>
+              <time datetime={post.data.date}>{fmtDate(post.data.date)}</time>
+            </div>
+          </a>
+        ))}
+      </div>
+      <p class="center-link"><a class="link-arrow" href="/blog">Всички статии →</a></p>
+    </div>
+  </section>
+
+  <section id="faq" class="band">
+    <div class="container">
+      <div class="section-head">
+        <span class="section-kicker">Въпроси</span>
+        <h2>Често задавани въпроси</h2>
+        <p>Кратки отговори на най-честите въпроси за приложението.</p>
+      </div>
+      <div class="faq">
+        {faqs.map((f) => (
+          <details>
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-section">
+    <img class="cta-bg" src="/art/hero-waves-900.webp" alt="" width="900" height="563" loading="lazy" decoding="async" />
+    <div class="container">
+      <span class="section-kicker">На живо 24/7</span>
+      <h2>Готов за слушане?</h2>
+      <p>Пуснете любимата си станция директно в браузъра — безплатно и без регистрация.</p>
+      <div class="hero-ctas">
+        <a class="cta" href="#player">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.14v13.72a1 1 0 0 0 1.52.85l11.02-6.86a1 1 0 0 0 0-1.7L9.52 4.29A1 1 0 0 0 8 5.14z"/></svg>
+          Слушай онлайн
+        </a>
+        <span class="cta cta-coming-soon">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 20.5V3.5c0-.6.3-1.1.8-1.4L13.5 12 3.8 21.9c-.5-.3-.8-.8-.8-1.4zm10.6-8.5l2.5-2.5L5.5 3.4c-.3-.2-.6-.3-.9-.3l9 8.9zm6.5-3.7L17.5 9.7l-2.7 2.3 2.7 2.3 2.6-1.4c.8-.5.8-1.7 0-2.1zM4.6 20.9c.3 0 .6-.1.9-.3l10.6-6.1-2.5-2.5-9 8.9z"/></svg>
+          Android — очаквайте скоро
+        </span>
+      </div>
     </div>
   </section>
 </Base>

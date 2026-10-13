@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'radio-bg-v3';
+const CACHE_VERSION = 'radio-bg-v4';
 const APP_SHELL = [
   '/',
   '/logo.png',
